@@ -1,0 +1,17 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+issueTrackerURL = "https://github.com/CoolAid48/Let-There-Be-Light/issues"
+license = "MIT"
+
+[[mods]]
+modId = "ltbl"
+version = "${version}"
+displayName = "Let There Be Light"
+authors = "CoolAid48"
+description = '''
+Adds a simple toggle beam button directly to the Beacon UI
+'''
+#logoFile = ""
+
+[[mixins]]
+config = "ltbl.mixins.json"

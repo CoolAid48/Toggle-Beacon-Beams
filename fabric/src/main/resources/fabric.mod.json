@@ -16,11 +16,8 @@
   "icon": "assets/ltbl/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "me.coolaid.tbb.fabric.ToggleBeaconBeamsFabric"
-    ],
     "client": [
-      "me.coolaid.tbb.fabric.client.ToggleBeaconBeamsFabricClient"
+      "me.coolaid.tbb.fabric.ToggleBeaconBeamsFabricClient"
     ]
   },
   "mixins": [

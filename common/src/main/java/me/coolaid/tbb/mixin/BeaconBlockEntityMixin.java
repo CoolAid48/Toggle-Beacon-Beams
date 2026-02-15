@@ -26,7 +26,6 @@ public abstract class BeaconBlockEntityMixin extends BlockEntity implements Beam
 
     @Unique
     private boolean beamToggle$isHidden = false;
-
     @Unique
     private boolean beamToggle$isForceVisible = false;
 

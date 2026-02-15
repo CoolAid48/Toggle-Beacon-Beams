@@ -1,4 +1,4 @@
-package me.coolaid.tbb.fabric.client;
+package me.coolaid.tbb.fabric;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import me.coolaid.tbb.ToggleBeaconBeams;
@@ -29,5 +29,8 @@ public final class ToggleBeaconBeamsFabricClient implements ClientModInitializer
                 ToggleBeaconBeams.toggleHideAllBeams();
             }
         });
+
+        // Run our common setup.
+        ToggleBeaconBeams.init();
     }
 }

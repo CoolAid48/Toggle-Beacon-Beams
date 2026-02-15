@@ -3,8 +3,12 @@
   "package": "me.coolaid.tbb.mixin",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
+  "client": [
+    "BeaconScreenMixin"
+  ],
   "mixins": [
-    "BeaconBlockMixin",
+    "AbstractContainerMenuMixin",
+    "BeaconMenuAccessor",
     "BeaconBlockEntityMixin"
   ],
   "injectors": {

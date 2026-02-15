@@ -29,11 +29,7 @@ public class AbstractContainerMenuMixin {
         access.execute((level, pos) -> {
             if (level.getBlockEntity(pos) instanceof BeaconBlockEntity beacon) {
                 BeamToggleAccess toggleAccess = (BeamToggleAccess) beacon;
-                if (ToggleBeaconBeams.isHideAllBeamsEnabled()) {
-                    toggleAccess.beamToggle$setForceVisible(!toggleAccess.beamToggle$isForceVisible());
-                } else {
-                    toggleAccess.beamToggle$setHidden(!toggleAccess.beamToggle$isHidden());
-                }
+                toggleAccess.beamToggle$setHidden(!toggleAccess.beamToggle$isHidden());
             }
         });
 

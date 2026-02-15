@@ -9,7 +9,7 @@ public final class ToggleBeaconBeams {
 
     public static final int TOGGLE_BEAM_BUTTON_ID = 1337;
 
-    private static boolean hideAllBeams = true;
+    private static boolean hideAllBeams = false;
 
     public static void init() {
         LOGGER.info("Let there be light!");

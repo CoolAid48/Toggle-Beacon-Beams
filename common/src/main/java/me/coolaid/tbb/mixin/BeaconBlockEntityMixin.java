@@ -86,7 +86,12 @@ public abstract class BeaconBlockEntityMixin extends BlockEntity implements Beam
 
     @Inject(method = "getBeamSections", at = @At("HEAD"), cancellable = true)
     private void hideBeamSectionsWhenHidden(CallbackInfoReturnable<List<BeaconBeamOwner.Section>> cir) {
-        boolean hideBecauseGlobalMode = ToggleBeaconBeams.isHideAllBeamsEnabled() && !this.beamToggle$isForceVisible;
+        boolean globalHidden = ToggleBeaconBeams.isHideAllBeamsEnabled();
+        if (!globalHidden && this.beamToggle$isForceVisible) {
+            this.beamToggle$setForceVisible(false);
+        }
+
+        boolean hideBecauseGlobalMode = globalHidden && !this.beamToggle$isForceVisible;
         if (this.beamToggle$isHidden || hideBecauseGlobalMode) {
             cir.setReturnValue(List.of());
         }

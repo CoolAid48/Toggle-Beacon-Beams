@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "ltbl",
+  "id": "toggle-beacon-beams",
   "version": "${version}",
-  "name": "Let There Be Light!",
+  "name": "Toggle Beacon Beams",
   "description": "Adds a simple toggle beam button directly to the Beacon UI",
   "authors": [
     "CoolAid48"
@@ -18,6 +18,9 @@
   "entrypoints": {
     "client": [
       "me.coolaid.tbb.fabric.ToggleBeaconBeamsFabricClient"
+    ],
+    "modmenu": [
+      "me.coolaid.tbb.fabric.compat.ModMenu"
     ]
   },
   "mixins": [

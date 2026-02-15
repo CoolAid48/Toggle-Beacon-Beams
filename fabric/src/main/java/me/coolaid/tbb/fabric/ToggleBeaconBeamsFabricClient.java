@@ -1,6 +1,5 @@
 package me.coolaid.tbb.fabric;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import me.coolaid.tbb.ToggleBeaconBeams;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -9,24 +8,25 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-public final class ToggleBeaconBeamsFabricClient implements ClientModInitializer {
+public class ToggleBeaconBeamsFabricClient implements ClientModInitializer {
 
-    private static final String TOGGLE_ALL_BEAMS_KEY = "key.tbb.toggle_all";
+    private static KeyMapping toggleBeamsKey;
     private static final KeyMapping.Category CATEGORY =
-            KeyMapping.Category.register(Identifier.parse("toggle-beacon-beams"));
+            KeyMapping.Category.register(Identifier.parse("tbb"));
 
     @Override
     public void onInitializeClient() {
-        KeyMapping toggleAllBeamsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                TOGGLE_ALL_BEAMS_KEY,
-                InputConstants.Type.KEYSYM,
+        toggleBeamsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.tbb.toggle_all",
                 GLFW.GLFW_KEY_B,
                 CATEGORY
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleAllBeamsKey.consumeClick()) {
-                ToggleBeaconBeams.toggleHideAllBeams();
+            if (client.level == null) return;
+
+            while (toggleBeamsKey.consumeClick()) {
+                ToggleBeaconBeams.toggleAllLoadedBeacons();
             }
         });
 

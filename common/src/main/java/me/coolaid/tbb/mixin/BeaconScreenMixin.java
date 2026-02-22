@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BeaconScreen.class)
 public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMenu> {
 
+    @Shadow
+    protected abstract <T extends AbstractWidget> T addBeaconButton(T beaconButton);
     @Unique
     private static final int beamToggle$buttonSize = 22;
     @Unique
@@ -41,7 +44,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         int beamToggle$buttonX = this.leftPos + 190;
         int beamToggle$buttonY = this.topPos + 107;
 
-        this.beamToggle$button = this.addRenderableWidget(
+        this.beamToggle$button = this.addBeaconButton(
                 Button.builder(Component.empty(), button -> {
                             if (this.minecraft.gameMode == null) return;
                             this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, ToggleBeaconBeams.TOGGLE_BEAM_BUTTON_ID);

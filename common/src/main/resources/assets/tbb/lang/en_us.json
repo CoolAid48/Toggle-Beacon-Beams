@@ -1,4 +1,14 @@
 {
+  "text.configScreen.title": "Toggle Beacon Beams Config",
+  "text.configScreen.onServer": "Unavailable on Multiplayer",
+
+  "text.configButton.disableMod": "Disable Mod",
+  "text.configButton.enableMod": "Enable Mod",
+  "text.configButton.modDisabled": "Toggle Beacon Beams Disabled",
+  "text.configButton.hideAll": "Hide All Beams",
+  "text.configButton.showAll": "Show All Beams",
+  "text.configButton.done": "Done",
+
   "component.beamtoggle.hide": "Hide Beam",
   "component.beamtoggle.show": "Show Beam"
 }

@@ -1,5 +1,6 @@
 package me.coolaid.tbb.mixin;
 
+import me.coolaid.tbb.config.ConfigManager;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -63,14 +64,14 @@ public abstract class BeaconBlockEntityMixin extends BlockEntity implements Beam
         }
     }
 
-    @Inject(method = "getUpdatePacket", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getUpdatePacket*", at = @At("RETURN"), cancellable = true)
     private void beamToggle$createUpdatePacket(CallbackInfoReturnable<ClientboundBlockEntityDataPacket> cir) {
         cir.setReturnValue(ClientboundBlockEntityDataPacket.create((BeaconBlockEntity)(Object)this));
     }
 
     @Inject(method = "getBeamSections", at = @At("HEAD"), cancellable = true)
     private void beamToggle$hideBeam(CallbackInfoReturnable<List<BeaconBeamOwner.Section>> cir) {
-        if (this.beamToggle$isHidden) {
+        if (ConfigManager.get().modEnabled && this.beamToggle$isHidden) {
             cir.setReturnValue(List.of());
         }
     }

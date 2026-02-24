@@ -6,8 +6,4 @@ public interface BeamToggleAccess {
 
     void beamToggle$setHidden(boolean hidden);
 
-    boolean beamToggle$isForceVisible();
-
-    void beamToggle$setForceVisible(boolean forceVisible);
-
 }

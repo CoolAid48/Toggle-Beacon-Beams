@@ -11,7 +11,7 @@ public final class ConfigManager {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static Path CONFIG_PATH = Path.of("config", "handsoffmyblock.json");
+    private static Path CONFIG_PATH = Path.of("config", "tbb.json");
     private static BeaconBeamsConfig CONFIG;
 
     public static void setConfigPath(Path path) {

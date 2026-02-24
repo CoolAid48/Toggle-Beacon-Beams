@@ -1,6 +1,7 @@
 package me.coolaid.tbb.mixin;
 
 import me.coolaid.tbb.ToggleBeaconBeams;
+import me.coolaid.tbb.config.ConfigManager;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -43,6 +45,8 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private static Constructor<?> beamToggle$powerButtonConstructor;
     @Unique
     private static Method beamToggle$setSelectedMethod;
+    @Unique
+    private BlockPos beamToggle$beaconPos;
 
     public BeaconScreenMixin(BeaconMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -50,13 +54,30 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
     @Inject(method = "init", at = @At("TAIL"))
     private void beamToggle$initBeamToggleWidget(CallbackInfo ci) {
+        if (!ConfigManager.get().modEnabled) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.hitResult instanceof BlockHitResult blockHitResult && mc.hitResult.getType() == HitResult.Type.BLOCK) {
+            this.beamToggle$beaconPos = blockHitResult.getBlockPos().immutable();
+        }
+
         int beamToggle$buttonX = this.leftPos + 156;
         int beamToggle$buttonY = this.topPos + 72;
 
         Button beamToggle$clickTarget = this.addRenderableWidget(
                 Button.builder(Component.empty(), button -> {
                             if (this.minecraft == null || this.minecraft.gameMode == null) return;
-                            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, ToggleBeaconBeams.TOGGLE_BEAM_BUTTON_ID);
+
+                            int buttonId;
+                            if (ToggleBeaconBeams.canUseClientConfigScreen()) {
+                                buttonId = ToggleBeaconBeams.TOGGLE_BEAM_BUTTON_ID;
+                            } else {
+                                buttonId = this.beamToggle$isCurrentBeaconHidden()
+                                        ? ToggleBeaconBeams.SHOW_BEAM_BUTTON_ID
+                                        : ToggleBeaconBeams.HIDE_BEAM_BUTTON_ID;
+                            }
+
+                            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
                             this.beamToggle$updateButtonPresentation();
                         })
                         .bounds(beamToggle$buttonX, beamToggle$buttonY, beamToggle$buttonSize, beamToggle$buttonSize)
@@ -83,14 +104,27 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private void beamToggle$updateButtonPresentation() {
         if (this.beamToggle$button == null) return;
 
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK) return;
+        boolean isHidden = this.beamToggle$isCurrentBeaconHidden();
+        this.beamToggle$button.setTooltip(Tooltip.create(isHidden ? beamToggle$showText : beamToggle$hideText));
+        this.beamToggle$forceUnpressedState();
+    }
 
-        if (mc.level.getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos()) instanceof BeaconBlockEntity beacon) {
-            boolean isHidden = ((BeamToggleAccess) beacon).beamToggle$isHidden();
-            this.beamToggle$button.setTooltip(Tooltip.create(isHidden ? beamToggle$showText : beamToggle$hideText));
-            this.beamToggle$forceUnpressedState();
+    @Unique
+    private boolean beamToggle$isCurrentBeaconHidden() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return false;
+
+        if (this.beamToggle$beaconPos != null && mc.level.getBlockEntity(this.beamToggle$beaconPos) instanceof BeaconBlockEntity beacon) {
+            return ((BeamToggleAccess) beacon).beamToggle$isHidden();
         }
+
+        if (mc.hitResult instanceof BlockHitResult blockHitResult && mc.hitResult.getType() == HitResult.Type.BLOCK &&
+                mc.level.getBlockEntity(blockHitResult.getBlockPos()) instanceof BeaconBlockEntity beaconFromHit) {
+            this.beamToggle$beaconPos = blockHitResult.getBlockPos().immutable();
+            return ((BeamToggleAccess) beaconFromHit).beamToggle$isHidden();
+        }
+
+        return false;
     }
 
     @Unique
@@ -121,7 +155,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
             Object powerButton = beamToggle$powerButtonConstructor.newInstance(this, x, y, holder, true, 0);
             if (!(powerButton instanceof AbstractWidget widget)) {
-                throw new IllegalStateException("Constructed BeaconPowerButton is not an AbstractWidget");
+                throw new IllegalStateException("BeaconPowerButton isn't an AbstractWidget");
             }
 
             if (beamToggle$addBeaconButtonMethod == null) {
@@ -133,7 +167,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
             return widget;
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
                  InvocationTargetException e) {
-            throw new RuntimeException("Failed to create and register Beacon effect-style toggle button", e);
+            throw new RuntimeException("Couldn't create Beacon toggle button", e);
         }
     }
 

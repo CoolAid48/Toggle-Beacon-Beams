@@ -3,17 +3,17 @@
   "id": "toggle-beacon-beams",
   "version": "${version}",
   "name": "Toggle Beacon Beams",
-  "description": "Adds a simple toggle beam button directly to the Beacon UI",
+  "description": "Adds a simple beacon beam toggle button to the beacon UI",
   "authors": [
     "CoolAid48"
   ],
   "contact": {
     "homepage": "https://coolaid.live/",
-    "issues": "https://github.com/CoolAid48/Let-There-Be-Light/issues",
-    "sources": "https://github.com/CoolAid48/Let-There-Be-Light"
+    "issues": "https://github.com/CoolAid48/Toggle-Beacon-Beams/issues",
+    "sources": "https://github.com/CoolAid48/Toggle-Beacon-Beams"
   },
   "license": "MIT",
-  "icon": "assets/ltbl/icon.png",
+  "icon": "assets/tbb/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -36,7 +36,7 @@
       "links": {
         "modmenu.donate": "https://ko-fi.com/coolaid48",
         "modmenu.discord": "https://discord.gg/J2SGshKNah",
-        "modmenu.modrinth": "https://modrinth.com/mod/let-there-be-light"
+        "modmenu.modrinth": "https://modrinth.com/mod/toggle-beacon-beams/settings"
       }
     }
   }

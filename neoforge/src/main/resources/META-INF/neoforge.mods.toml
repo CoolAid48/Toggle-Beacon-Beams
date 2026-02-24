@@ -11,7 +11,7 @@ authors = "CoolAid48"
 description = '''
 Adds a simple toggle beam button directly to the Beacon UI
 '''
-#logoFile = ""
+logoFile = "assets/tbb/icon.png"
 
 [[mixins]]
 config = "ltbl.mixins.json"

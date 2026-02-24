@@ -1,6 +1,5 @@
 package me.coolaid.tbb;
 
-import me.coolaid.tbb.config.BeaconBeamsConfig;
 import me.coolaid.tbb.config.ConfigManager;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.client.Minecraft;
@@ -14,17 +13,10 @@ public final class ToggleBeaconBeams {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final int TOGGLE_BEAM_BUTTON_ID = 1337;
 
-    private static boolean allBeamsHidden = false;
-
     public static void init() {
         ConfigManager.load();
 
         LOGGER.info("Let there be light!");
-    }
-
-    public static void toggleAllLoadedBeacons() {
-        allBeamsHidden = !allBeamsHidden;
-        setAllLoadedBeaconsHidden(allBeamsHidden);
     }
 
     public static void setAllLoadedBeaconsHidden(boolean hide) {

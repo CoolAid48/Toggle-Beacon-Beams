@@ -1,5 +1,6 @@
 package me.coolaid.tbb.config;
 
+import me.coolaid.tbb.ToggleBeaconBeams;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -10,14 +11,11 @@ import net.minecraft.network.chat.Component;
 public class ConfigScreen extends Screen {
 
     private final Screen parent;
-    private Component statusText;
-    private int statusColor;
     private StringWidget titleWidget;
 
     public ConfigScreen(Screen parent) {
         super(Component.translatable("text.configScreen.title"));
         this.parent = parent;
-        this.statusText = Component.empty();
     }
 
     @Override
@@ -35,6 +33,7 @@ public class ConfigScreen extends Screen {
                         Component.translatable(ConfigManager.get().hideAllBeaconBeams ? "component.configButton.yes" : "component.configButton.no")),
                 btn -> {
                     ConfigManager.get().hideAllBeaconBeams = !ConfigManager.get().hideAllBeaconBeams;
+                    ToggleBeaconBeams.setAllLoadedBeaconsHidden(ConfigManager.get().hideAllBeaconBeams);
                     btn.setMessage(Component.translatable("text.configButton.hideAll",
                             Component.translatable(ConfigManager.get().hideAllBeaconBeams ? "component.configButton.yes" : "component.configButton.no")));
                     ConfigManager.save();
@@ -50,17 +49,6 @@ public class ConfigScreen extends Screen {
                 }
         ).bounds(centerX - 60, y + buttonHeight + 4, 120, 20).build());
 
-        // Status text widget
-        this.addRenderableWidget(new StringWidget(
-                centerX - 100, y, 200, 20, statusText, this.font
-        ) {
-            @Override
-            public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-                if (!statusText.getString().isEmpty()) {
-                    graphics.drawCenteredString(font, statusText, getX() + getWidth() / 2, getY(), statusColor);
-                }
-            }
-        });
     }
 
     @Override
@@ -72,10 +60,12 @@ public class ConfigScreen extends Screen {
         // Screen title component
         int textWidth = this.font.width(title) + 25; // Include +25 to fit bold formatting
         Component title = Component.translatable("text.configScreen.title").withStyle(ChatFormatting.BOLD);
-        titleWidget = new StringWidget(
-                (this.width - textWidth) / 2, 10, textWidth, 9, title, this.font
-        );
-        this.addRenderableWidget(titleWidget);
+        if (this.titleWidget == null) {
+            titleWidget = new StringWidget(
+                    (this.width - textWidth) / 2, 10, textWidth, 9, title, this.font
+            );
+            this.addRenderableWidget(titleWidget);
+        }
     }
 
     @Override

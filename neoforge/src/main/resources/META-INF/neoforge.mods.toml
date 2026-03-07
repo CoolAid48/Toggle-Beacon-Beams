@@ -4,10 +4,11 @@ issueTrackerURL = "https://github.com/CoolAid48/Let-There-Be-Light/issues"
 license = "MIT"
 
 [[mods]]
-modId = "ltbl"
+modId = "toggle-beacon-beams"
 version = "${version}"
 displayName = "Let There Be Light"
 authors = "CoolAid48"
+credits = "MandaLin (Mod icon and sprites)"
 description = '''
 Adds a simple toggle beam button directly to the Beacon UI
 '''

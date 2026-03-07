@@ -28,7 +28,7 @@ public class ConfigScreen extends Screen {
             if (this.minecraft != null) {
                 this.minecraft.setScreen(null);
                 if (this.minecraft.player != null) {
-                    this.minecraft.player.displayClientMessage(Component.translatable("text.configScreen.onServer"), true);
+                    this.minecraft.player.displayClientMessage(Component.translatable("text.configScreen.onServer").withStyle(ChatFormatting.DARK_RED), true);
                 }
             }
             return;

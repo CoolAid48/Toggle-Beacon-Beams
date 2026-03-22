@@ -13,7 +13,7 @@ public final class ToggleBeaconBeamsNeoForge {
         ToggleBeaconBeams.init();
 
         // Register the config screen with NeoForge's built-in mod menu
-        ModList.get().getModContainerById("toggle-beacon-beams").ifPresent(mod -> {
+        ModList.get().getModContainerById("togglebeaconbeams").ifPresent(mod -> {
             mod.registerExtensionPoint(IConfigScreenFactory.class,
                     (IConfigScreenFactory)(minecraft, parent) -> new ConfigScreen(parent));
         });

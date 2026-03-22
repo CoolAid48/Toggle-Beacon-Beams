@@ -1,18 +1,18 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
-issueTrackerURL = "https://github.com/CoolAid48/Let-There-Be-Light/issues"
+issueTrackerURL = "https://github.com/CoolAid48/Toggle-Beacon-Beams/issues"
 license = "MIT"
 
 [[mods]]
-modId = "toggle-beacon-beams"
-version = "${version}"
-displayName = "Let There Be Light"
+modId = "togglebeaconbeams"
+version = "0.1.0"
+displayName = "Toggle Beacon Beams"
 authors = "CoolAid48"
 credits = "MandaLin (Mod icon and sprites)"
 description = '''
-Adds a simple toggle beam button directly to the Beacon UI
+Adds a simple beacon beam toggle button to the beacon UI
 '''
 logoFile = "assets/tbb/icon.png"
 
 [[mixins]]
-config = "ltbl.mixins.json"
+config = "tbb.mixins.json"

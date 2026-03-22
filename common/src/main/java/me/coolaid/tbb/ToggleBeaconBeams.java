@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ToggleBeaconBeams {
-    public static final String MOD_ID = "toggle-beacon-beams";
+    public static final String MOD_ID = "togglebeaconbeams";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final int TOGGLE_BEAM_BUTTON_ID = 1337;
     public static final int HIDE_BEAM_BUTTON_ID = 1338;

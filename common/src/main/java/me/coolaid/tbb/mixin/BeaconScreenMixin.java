@@ -41,16 +41,15 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     @Unique
     private static final int beamToggle$buttonOffsetY = 72;
     @Unique
-    private static final int beamToggle$hoverOverlayColor = 0x339293B3;
-    @Unique
     private static final int beamToggle$iconInset = 2;
     @Unique
-    private static final int beamToggle$iconMaskColor = 0xFF343434;
-
+    private static final Identifier beamToggle$buttonTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button.png");
     @Unique
-    private static final Identifier beamToggle$hideBeamSprite = Identifier.fromNamespaceAndPath("tbb", "beacon/hide_beam");
+    private static final Identifier beamToggle$buttonHighlightedTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button_highlighted.png");
     @Unique
-    private static final Identifier beamToggle$showBeamSprite = Identifier.fromNamespaceAndPath("tbb", "beacon/show_beam");
+    private static final Identifier beamToggle$hideBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/hide_beam.png");
+    @Unique
+    private static final Identifier beamToggle$showBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/show_beam.png");
 
     @Unique
     private static final Component beamToggle$hideText = Component.translatable("component.beamtoggle.hide");
@@ -66,6 +65,8 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
     @Unique
     private AbstractWidget beamToggle$button;
+    @Unique
+    private Button beamToggle$clickTarget;
     @Unique
     private BlockPos beamToggle$beaconPos;
 
@@ -101,31 +102,29 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private void beamToggle$renderCustomSprite(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         if (this.beamToggle$button == null) return;
 
-        Identifier sprite = this.beamToggle$isCurrentBeaconHidden() ? beamToggle$showBeamSprite : beamToggle$hideBeamSprite;
+        boolean hovered = this.beamToggle$button.isHoveredOrFocused();
+        Identifier buttonTexture = hovered ? beamToggle$buttonHighlightedTexture : beamToggle$buttonTexture;
+        Identifier texture = this.beamToggle$isCurrentBeaconHidden() ? beamToggle$showBeamTexture : beamToggle$hideBeamTexture;
         int x = this.beamToggle$button.getX();
         int y = this.beamToggle$button.getY();
 
-        int iconX1 = x + beamToggle$iconInset;
-        int iconY1 = y + beamToggle$iconInset;
-        int iconX2 = x + beamToggle$buttonSize - beamToggle$iconInset;
-        int iconY2 = y + beamToggle$buttonSize - beamToggle$iconInset;
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, buttonTexture, x, y, 0.0F, 0.0F, beamToggle$buttonSize, beamToggle$buttonSize, beamToggle$buttonSize, beamToggle$buttonSize);
 
-        guiGraphics.fill(iconX1, iconY1, iconX2, iconY2, beamToggle$iconMaskColor);
-        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, beamToggle$buttonSize, beamToggle$buttonSize);
+        int iconX = x + beamToggle$iconInset;
+        int iconY = y + beamToggle$iconInset;
+        int iconSize = beamToggle$buttonSize - (beamToggle$iconInset * 2);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, iconX, iconY, 0.0F, 0.0F, iconSize, iconSize, iconSize, iconSize);
 
-        if (this.beamToggle$button.isHoveredOrFocused()) {
-            guiGraphics.fill(x, y, x + beamToggle$buttonSize, y + beamToggle$buttonSize, beamToggle$hoverOverlayColor);
-        }
     }
 
     @Unique
     private void beamToggle$addInvisibleClickTarget(int x, int y) {
-        Button clickTarget = this.addRenderableWidget(
+        this.beamToggle$clickTarget = this.addRenderableWidget(
                 Button.builder(Component.empty(), button -> this.beamToggle$onPressed())
                         .bounds(x, y, beamToggle$buttonSize, beamToggle$buttonSize)
                         .build()
         );
-        clickTarget.setAlpha(0.0F);
+        this.beamToggle$clickTarget.setAlpha(0.0F);
     }
 
     @Unique
@@ -151,6 +150,10 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
         boolean isHidden = this.beamToggle$isCurrentBeaconHidden();
         this.beamToggle$button.setTooltip(Tooltip.create(isHidden ? beamToggle$showText : beamToggle$hideText));
+        if (this.beamToggle$clickTarget != null) {
+            this.beamToggle$clickTarget.active = this.beamToggle$button.active;
+            this.beamToggle$clickTarget.visible = this.beamToggle$button.visible;
+        }
         this.beamToggle$forceUnpressedState();
     }
 

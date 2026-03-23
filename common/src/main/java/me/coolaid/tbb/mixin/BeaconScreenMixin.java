@@ -12,10 +12,8 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
@@ -27,8 +25,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @Mixin(BeaconScreen.class)
@@ -57,16 +53,10 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private static final Component beamToggle$showText = Component.translatable("component.beamtoggle.show");
 
     @Unique
-    private static Method beamToggle$addBeaconButtonMethod;
-    @Unique
-    private static Constructor<?> beamToggle$powerButtonConstructor;
-    @Unique
     private static Method beamToggle$setSelectedMethod;
 
     @Unique
     private AbstractWidget beamToggle$button;
-    @Unique
-    private Button beamToggle$clickTarget;
     @Unique
     private BlockPos beamToggle$beaconPos;
 
@@ -83,8 +73,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         int buttonX = this.leftPos + beamToggle$buttonOffsetX;
         int buttonY = this.topPos + beamToggle$buttonOffsetY;
 
-        this.beamToggle$addInvisibleClickTarget(buttonX, buttonY);
-        this.beamToggle$button = this.beamToggle$addEffectStyleButton(buttonX, buttonY);
+        this.beamToggle$button = this.beamToggle$addToggleButton(buttonX, buttonY);
         this.beamToggle$updateButtonPresentation();
     }
 
@@ -118,13 +107,12 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     }
 
     @Unique
-    private void beamToggle$addInvisibleClickTarget(int x, int y) {
-        this.beamToggle$clickTarget = this.addRenderableWidget(
-                Button.builder(Component.empty(), button -> this.beamToggle$onPressed())
-                        .bounds(x, y, beamToggle$buttonSize, beamToggle$buttonSize)
-                        .build()
-        );
-        this.beamToggle$clickTarget.setAlpha(0.0F);
+    private Button beamToggle$addToggleButton(int x, int y) {
+        Button button = Button.builder(Component.empty(), press -> this.beamToggle$onPressed())
+                .bounds(x, y, beamToggle$buttonSize, beamToggle$buttonSize)
+                .build();
+        button.setAlpha(0.0F);
+        return this.addRenderableWidget(button);
     }
 
     @Unique
@@ -150,11 +138,6 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
         boolean isHidden = this.beamToggle$isCurrentBeaconHidden();
         this.beamToggle$button.setTooltip(Tooltip.create(isHidden ? beamToggle$showText : beamToggle$hideText));
-        if (this.beamToggle$clickTarget != null) {
-            this.beamToggle$clickTarget.active = this.beamToggle$button.active;
-            this.beamToggle$clickTarget.visible = this.beamToggle$button.visible;
-        }
-        this.beamToggle$forceUnpressedState();
     }
 
     @Unique
@@ -194,35 +177,6 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
             }
             beamToggle$setSelectedMethod.invoke(this.beamToggle$button, false);
         } catch (ReflectiveOperationException ignored) {
-        }
-    }
-
-    @Unique
-    private AbstractWidget beamToggle$addEffectStyleButton(int x, int y) {
-        try {
-            if (beamToggle$powerButtonConstructor == null) {
-                Class<?> powerButtonClass = Class.forName("net.minecraft.client.gui.screens.inventory.BeaconScreen$BeaconPowerButton");
-                beamToggle$powerButtonConstructor = powerButtonClass.getDeclaredConstructor(BeaconScreen.class, int.class, int.class, Holder.class, boolean.class, int.class);
-                beamToggle$powerButtonConstructor.setAccessible(true);
-            }
-
-            @SuppressWarnings("unchecked")
-            Holder<MobEffect> holder = (Holder<MobEffect>) BeaconBlockEntity.BEACON_EFFECTS.getFirst().getFirst();
-            Object powerButton = beamToggle$powerButtonConstructor.newInstance(this, x, y, holder, true, 0);
-            if (!(powerButton instanceof AbstractWidget widget)) {
-                throw new IllegalStateException("BeaconPowerButton isn't an AbstractWidget");
-            }
-
-            if (beamToggle$addBeaconButtonMethod == null) {
-                beamToggle$addBeaconButtonMethod = BeaconScreen.class.getDeclaredMethod("addBeaconButton", AbstractWidget.class);
-                beamToggle$addBeaconButtonMethod.setAccessible(true);
-            }
-
-            beamToggle$addBeaconButtonMethod.invoke(this, widget);
-            return widget;
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException e) {
-            throw new RuntimeException("Couldn't create Beacon toggle button", e);
         }
     }
 }

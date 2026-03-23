@@ -6,9 +6,9 @@
 ### Adds a simple beacon beam toggle button to the beacon UI!
 
 ## This mod features:
-- **A simple toggle button within the beacon UI to  turn individual beacon beams on and off**
+- **A simple toggle button within the beacon UI to turn individual beacon beams on and off**
 - **Config toggle to turn all loaded beacon beams off and in singleplayer**
-- **Works on multiplayer, oth client-side and server-side required**
+- **Works on multiplayer, both client-side and server-side required**
 
 #### Any bugs or issues, please make a report on [GitHub](https://github.com/CoolAid48/Toggle-Beacon-Beams/issues)
 

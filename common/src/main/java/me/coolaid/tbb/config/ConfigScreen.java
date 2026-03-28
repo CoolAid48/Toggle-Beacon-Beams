@@ -4,7 +4,7 @@ import me.coolaid.tbb.ToggleBeaconBeams;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,11 +25,9 @@ public class ConfigScreen extends Screen {
     @Override
     protected void init() {
         if (ToggleBeaconBeams.canUseClientConfigScreen()) {
-            if (this.minecraft != null) {
-                this.minecraft.setScreen(null);
-                if (this.minecraft.player != null) {
-                    this.minecraft.player.displayClientMessage(Component.translatable("text.configScreen.onServer").withStyle(ChatFormatting.DARK_RED), true);
-                }
+            this.minecraft.setScreen(null);
+            if (this.minecraft.player != null) {
+                this.minecraft.player.sendOverlayMessage(Component.translatable("text.configScreen.onServer").withStyle(ChatFormatting.DARK_RED));
             }
             return;
         }
@@ -123,10 +121,10 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         // Draws background and widgets
         graphics.fillGradient(0, 0, this.width, this.height, 0xC0101010, 0xD0101010);
-        super.render(graphics, mouseX, mouseY, delta);
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
 
     }
 

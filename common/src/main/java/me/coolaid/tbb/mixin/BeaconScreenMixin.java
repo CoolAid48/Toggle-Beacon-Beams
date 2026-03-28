@@ -4,7 +4,7 @@ import me.coolaid.tbb.ToggleBeaconBeams;
 import me.coolaid.tbb.config.ConfigManager;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -42,6 +42,8 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private static final Identifier beamToggle$buttonTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button.png");
     @Unique
     private static final Identifier beamToggle$buttonHighlightedTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button_highlighted.png");
+    @Unique
+    private static final Identifier beamToggle$buttonDisabledTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button_disabled.png");
     @Unique
     private static final Identifier beamToggle$hideBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/hide_beam.png");
     @Unique
@@ -84,15 +86,30 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
     @Inject(method = "updateButtons", at = @At("TAIL"))
     private void beamToggle$keepEffectStyleUnpressed(CallbackInfo ci) {
-        this.beamToggle$forceUnpressedState();
+        if (this.beamToggle$button != null) {
+            // Active when beacon has loaded (levels > 0 means it's powered/loaded)
+            this.beamToggle$button.active = this.menu.getLevels() > 0;
+            this.beamToggle$forceUnpressedState();
+        }
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void beamToggle$renderCustomSprite(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+    @Inject(method = "extractBackground", at = @At("TAIL"))
+    private void beamToggle$renderCustomSprite(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         if (this.beamToggle$button == null) return;
 
+        boolean active = this.beamToggle$button.active;
         boolean hovered = this.beamToggle$button.isHoveredOrFocused();
-        Identifier buttonTexture = hovered ? beamToggle$buttonHighlightedTexture : beamToggle$buttonTexture;
+
+        // Choose button background based on state
+        Identifier buttonTexture;
+        if (!active) {
+            buttonTexture = beamToggle$buttonDisabledTexture; // Gray when inactive
+        } else if (hovered) {
+            buttonTexture = beamToggle$buttonHighlightedTexture;
+        } else {
+            buttonTexture = beamToggle$buttonTexture;
+        }
+
         Identifier texture = this.beamToggle$isCurrentBeaconHidden() ? beamToggle$showBeamTexture : beamToggle$hideBeamTexture;
         int x = this.beamToggle$button.getX();
         int y = this.beamToggle$button.getY();
@@ -103,7 +120,6 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         int iconY = y + beamToggle$iconInset;
         int iconSize = beamToggle$buttonSize - (beamToggle$iconInset * 2);
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, texture, iconX, iconY, 0.0F, 0.0F, iconSize, iconSize, iconSize, iconSize);
-
     }
 
     @Unique
@@ -117,7 +133,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
 
     @Unique
     private void beamToggle$onPressed() {
-        if (this.minecraft == null || this.minecraft.gameMode == null) return;
+        if (this.minecraft.gameMode == null) return;
 
         int buttonId;
         if (ToggleBeaconBeams.canUseClientConfigScreen()) {

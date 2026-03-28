@@ -1,6 +1,6 @@
 # Toggle Beacon Beams
 ![](https://img.shields.io/badge/Loader-Fabric%2fQuilt_%2b_NeoForge-cyan?style=for-the-badge)
-![](https://img.shields.io/badge/Supports_Versions-1.21.11-cyan?style=for-the-badge)
+![](https://img.shields.io/badge/Supports_Versions-1.21.11_|_26.1-cyan?style=for-the-badge)
 ![](https://img.shields.io/badge/Environments-Client_+_Server-cyan?style=for-the-badge)
 
 ### Adds a simple beacon beam toggle button to the beacon UI!

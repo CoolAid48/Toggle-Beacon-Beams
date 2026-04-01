@@ -46,18 +46,16 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private static final Identifier beamToggle$hideBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/hide_beam.png");
     @Unique
     private static final Identifier beamToggle$showBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/show_beam.png");
-
     @Unique
     private static final Component beamToggle$hideText = Component.translatable("component.beamtoggle.hide");
     @Unique
     private static final Component beamToggle$showText = Component.translatable("component.beamtoggle.show");
-
     @Unique
     private static Method beamToggle$setSelectedMethod;
-
     @Unique
     private AbstractWidget beamToggle$button;
     @Unique
+
     private BlockPos beamToggle$beaconPos;
 
     public BeaconScreenMixin(BeaconMenu menu, Inventory inventory, Component title) {

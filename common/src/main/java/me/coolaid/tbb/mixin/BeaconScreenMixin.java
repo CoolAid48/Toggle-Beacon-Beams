@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
@@ -39,13 +39,13 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     @Unique
     private static final int beamToggle$iconInset = 2;
     @Unique
-    private static final Identifier beamToggle$buttonTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button.png");
+    private static final ResourceLocation beamToggle$buttonTexture = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button.png");
     @Unique
-    private static final Identifier beamToggle$buttonHighlightedTexture = Identifier.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button_highlighted.png");
+    private static final ResourceLocation beamToggle$buttonHighlightedTexture = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/sprites/container/beacon/button_highlighted.png");
     @Unique
-    private static final Identifier beamToggle$hideBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/hide_beam.png");
+    private static final ResourceLocation beamToggle$hideBeamTexture = ResourceLocation.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/hide_beam.png");
     @Unique
-    private static final Identifier beamToggle$showBeamTexture = Identifier.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/show_beam.png");
+    private static final ResourceLocation beamToggle$showBeamTexture = ResourceLocation.fromNamespaceAndPath("tbb", "textures/gui/sprites/beacon/show_beam.png");
 
     @Unique
     private static final Component beamToggle$hideText = Component.translatable("component.beamtoggle.hide");
@@ -92,8 +92,8 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         if (this.beamToggle$button == null) return;
 
         boolean hovered = this.beamToggle$button.isHoveredOrFocused();
-        Identifier buttonTexture = hovered ? beamToggle$buttonHighlightedTexture : beamToggle$buttonTexture;
-        Identifier texture = this.beamToggle$isCurrentBeaconHidden() ? beamToggle$showBeamTexture : beamToggle$hideBeamTexture;
+        ResourceLocation buttonTexture = hovered ? beamToggle$buttonHighlightedTexture : beamToggle$buttonTexture;
+        ResourceLocation texture = this.beamToggle$isCurrentBeaconHidden() ? beamToggle$showBeamTexture : beamToggle$hideBeamTexture;
         int x = this.beamToggle$button.getX();
         int y = this.beamToggle$button.getY();
 

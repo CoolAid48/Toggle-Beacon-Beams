@@ -30,8 +30,8 @@
     "tbb.mixins.json"
   ],
   "depends": {
-    "minecraft": "~1.21.11",
-    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.21.9",
+    "fabricloader": ">=0.17.2",
     "fabric-api": "*"
   },
   "custom": {
@@ -39,7 +39,7 @@
       "links": {
         "modmenu.donate": "https://ko-fi.com/coolaid48",
         "modmenu.discord": "https://discord.gg/J2SGshKNah",
-        "modmenu.modrinth": "https://modrinth.com/mod/toggle-beacon-beams/settings"
+        "modmenu.modrinth": "https://modrinth.com/mod/toggle-beacon-beams"
       }
     }
   }

@@ -48,19 +48,19 @@ public abstract class BeaconBlockEntityMixin extends BlockEntity implements Beam
 
     @Inject(method = "loadAdditional", at = @At("TAIL"))
     protected void beamToggle$load(ValueInput input, CallbackInfo ci) {
-        this.beamToggle$isHidden = input.getBooleanOr("ltbl_hidden", false);
+        this.beamToggle$isHidden = input.getBooleanOr("tbb_hidden", false);
     }
 
     @Inject(method = "saveAdditional", at = @At("TAIL"))
     protected void beamToggle$save(ValueOutput output, CallbackInfo ci) {
-        output.putBoolean("ltbl_hidden", this.beamToggle$isHidden);
+        output.putBoolean("tbb_hidden", this.beamToggle$isHidden);
     }
 
     @Inject(method = "getUpdateTag", at = @At("RETURN"))
     private void beamToggle$addToUpdateTag(HolderLookup.Provider registries, CallbackInfoReturnable<CompoundTag> cir) {
         CompoundTag tag = cir.getReturnValue();
         if (tag != null) {
-            tag.putBoolean("ltbl_hidden", this.beamToggle$isHidden);
+            tag.putBoolean("tbb_hidden", this.beamToggle$isHidden);
         }
     }
 

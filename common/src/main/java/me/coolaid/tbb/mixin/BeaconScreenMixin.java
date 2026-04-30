@@ -1,7 +1,10 @@
 package me.coolaid.tbb.mixin;
 
 import me.coolaid.tbb.ToggleBeaconBeams;
+import me.coolaid.tbb.ToggleBeaconBeamsClient;
 import me.coolaid.tbb.config.ConfigManager;
+import me.coolaid.tbb.config.LocalToggleStore;
+import me.coolaid.tbb.network.ServerPresenceTracker;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -14,8 +17,10 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -135,16 +140,30 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private void beamToggle$onPressed() {
         if (this.minecraft.gameMode == null) return;
 
-        int buttonId;
-        if (ToggleBeaconBeams.canUseClientConfigScreen()) {
-            buttonId = ToggleBeaconBeams.TOGGLE_BEAM_BUTTON_ID;
-        } else {
-            buttonId = this.beamToggle$isCurrentBeaconHidden()
+        if (ServerPresenceTracker.isServerPresent()) {
+            int buttonId = ToggleBeaconBeamsClient.canUseClientConfigScreen()
+                ? ToggleBeaconBeams.TOGGLE_BEAM_BUTTON_ID
+                : (this.beamToggle$isCurrentBeaconHidden()
                     ? ToggleBeaconBeams.SHOW_BEAM_BUTTON_ID
-                    : ToggleBeaconBeams.HIDE_BEAM_BUTTON_ID;
+                    : ToggleBeaconBeams.HIDE_BEAM_BUTTON_ID);
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
+        } else {
+            // Client-only fallback: Write to local store and force re-render
+            if (this.minecraft.level != null && this.beamToggle$beaconPos != null) {
+                String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(this.minecraft);
+                ResourceKey<Level> dim = this.minecraft.level.dimension();
+                boolean current = LocalToggleStore.isHidden(worldIdentifier, dim, this.beamToggle$beaconPos);
+                LocalToggleStore.setHidden(worldIdentifier, dim, this.beamToggle$beaconPos, !current);
+                // Force the beacon renderer to re-evaluate getBeamSections
+                this.minecraft.level.sendBlockUpdated(
+                    this.beamToggle$beaconPos,
+                    this.minecraft.level.getBlockState(this.beamToggle$beaconPos),
+                    this.minecraft.level.getBlockState(this.beamToggle$beaconPos),
+                    3
+                );
+            }
         }
 
-        this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
         this.beamToggle$updateButtonPresentation();
     }
 
@@ -169,18 +188,30 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return false;
 
-        if (this.beamToggle$beaconPos != null && mc.level.getBlockEntity(this.beamToggle$beaconPos) instanceof BeaconBlockEntity beacon) {
-            return ((BeamToggleAccess) beacon).beamToggle$isHidden();
-        }
+        BlockPos pos = this.beamToggle$resolveBeaconPos();
+        if (pos == null) return false;
 
-        if (mc.hitResult instanceof BlockHitResult blockHitResult
-                && mc.hitResult.getType() == HitResult.Type.BLOCK
-                && mc.level.getBlockEntity(blockHitResult.getBlockPos()) instanceof BeaconBlockEntity beaconFromHit) {
-            this.beamToggle$beaconPos = blockHitResult.getBlockPos().immutable();
-            return ((BeamToggleAccess) beaconFromHit).beamToggle$isHidden();
+        if (ServerPresenceTracker.isServerPresent()) {
+            if (mc.level.getBlockEntity(pos) instanceof BeaconBlockEntity beacon) {
+                return ((BeamToggleAccess) beacon).beamToggle$isHidden();
+            }
+        } else {
+            String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
+            return LocalToggleStore.isHidden(worldIdentifier, mc.level.dimension(), pos);
         }
 
         return false;
+    }
+
+    @Unique
+    private BlockPos beamToggle$resolveBeaconPos() {
+        Minecraft mc = Minecraft.getInstance();
+        if (this.beamToggle$beaconPos != null) return this.beamToggle$beaconPos;
+        if (mc.hitResult instanceof BlockHitResult bhr && mc.hitResult.getType() == HitResult.Type.BLOCK) {
+            this.beamToggle$beaconPos = bhr.getBlockPos().immutable();
+            return this.beamToggle$beaconPos;
+        }
+        return null;
     }
 
     @Unique

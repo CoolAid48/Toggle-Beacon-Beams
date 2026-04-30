@@ -19,6 +19,9 @@
   "icon": "assets/tbb/icon.png",
   "environment": "*",
   "entrypoints": {
+    "main": [
+      "me.coolaid.tbb.fabric.ToggleBeaconBeamsFabric"
+    ],
     "client": [
       "me.coolaid.tbb.fabric.ToggleBeaconBeamsFabricClient"
     ],

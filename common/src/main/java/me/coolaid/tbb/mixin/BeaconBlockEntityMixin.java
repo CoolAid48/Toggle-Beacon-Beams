@@ -1,7 +1,11 @@
 package me.coolaid.tbb.mixin;
 
+import me.coolaid.tbb.ToggleBeaconBeamsClient;
 import me.coolaid.tbb.config.ConfigManager;
+import me.coolaid.tbb.config.LocalToggleStore;
+import me.coolaid.tbb.network.ServerPresenceTracker;
 import me.coolaid.tbb.util.BeamToggleAccess;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -71,8 +75,20 @@ public abstract class BeaconBlockEntityMixin extends BlockEntity implements Beam
 
     @Inject(method = "getBeamSections", at = @At("HEAD"), cancellable = true)
     private void beamToggle$hideBeam(CallbackInfoReturnable<List<BeaconBeamOwner.Section>> cir) {
-        if (ConfigManager.get().modEnabled && this.beamToggle$isHidden) {
-            cir.setReturnValue(List.of());
+        if (!ConfigManager.get().modEnabled) return;
+
+        // Server Mode: Existing flag set by AbstractContainerMenuMixin
+        if (ServerPresenceTracker.isServerPresent()) {
+            if (this.beamToggle$isHidden) cir.setReturnValue(List.of());
+            return;
+        }
+
+        // Client-only fallback: Check local store (client-side rendering only)
+        if (this.level != null && this.level.isClientSide()) {
+            String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(Minecraft.getInstance());
+            if (LocalToggleStore.isHidden(worldIdentifier, this.level.dimension(), this.worldPosition)) {
+                cir.setReturnValue(List.of());
+            }
         }
     }
 }

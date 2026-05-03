@@ -1,6 +1,7 @@
 package me.coolaid.tbb.config;
 
 import me.coolaid.tbb.ToggleBeaconBeams;
+import me.coolaid.tbb.ToggleBeaconBeamsClient;
 import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -24,7 +25,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     protected void init() {
-        if (ToggleBeaconBeams.canUseClientConfigScreen()) {
+        if (ToggleBeaconBeamsClient.canUseClientConfigScreen()) {
             this.minecraft.setScreen(null);
             if (this.minecraft.player != null) {
                 this.minecraft.player.sendOverlayMessage(Component.translatable("text.configScreen.onServer").withStyle(ChatFormatting.DARK_RED));
@@ -54,7 +55,7 @@ public class ConfigScreen extends Screen {
                     ConfigManager.get().modEnabled = !ConfigManager.get().modEnabled;
                     if (!ConfigManager.get().modEnabled) {
                         ConfigManager.get().hideAllBeaconBeams = false;
-                        ToggleBeaconBeams.setAllLoadedBeaconsHidden(false);
+                        ToggleBeaconBeamsClient.setAllLoadedBeaconsHidden(false);
                     }
 
                     btn.setMessage(this.beamToggle$getModEnabledButtonText());
@@ -69,7 +70,7 @@ public class ConfigScreen extends Screen {
                 this.beamToggle$getToggleAllButtonText(),
                 btn -> {
                     ConfigManager.get().hideAllBeaconBeams = !ConfigManager.get().hideAllBeaconBeams;
-                    ToggleBeaconBeams.setAllLoadedBeaconsHidden(ConfigManager.get().hideAllBeaconBeams);
+                    ToggleBeaconBeamsClient.setAllLoadedBeaconsHidden(ConfigManager.get().hideAllBeaconBeams);
                     btn.setMessage(this.beamToggle$getToggleAllButtonText());
                     ConfigManager.save();
                 }

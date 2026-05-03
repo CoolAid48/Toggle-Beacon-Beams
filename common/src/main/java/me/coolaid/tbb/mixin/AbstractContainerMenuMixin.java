@@ -35,7 +35,6 @@ public class AbstractContainerMenuMixin {
                     } else if (id == ToggleBeaconBeams.SHOW_BEAM_BUTTON_ID) {
                         toggleAccess.beamToggle$setHidden(false);
                     }
-                    level.sendBlockUpdated(pos, beacon.getBlockState(), beacon.getBlockState(), 3);
                 }
             });
             cir.setReturnValue(true);

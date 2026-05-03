@@ -27,12 +27,20 @@ public class LocalToggleStore {
     }
 
     public static void setHidden(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean hidden) {
-        if (hidden) {
-            toggles.put(getKeyFrom(worldIdentifier, dimension, pos), true);
-        } else {
-            toggles.remove(getKeyFrom(worldIdentifier, dimension, pos));
+        if (setHiddenInMemory(worldIdentifier, dimension, pos, hidden)) {
+            save();
         }
-        save();
+    }
+
+    public static boolean setHiddenInMemory(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean hidden) {
+        String key = getKeyFrom(worldIdentifier, dimension, pos);
+        if (hidden) {
+            if (Boolean.TRUE.equals(toggles.get(key))) return false;
+            toggles.put(key, true);
+            return true;
+        }
+
+        return toggles.remove(key) != null;
     }
 
     public static void load() {

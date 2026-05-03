@@ -46,7 +46,8 @@ public abstract class BeaconBlockEntityMixin extends BlockEntity implements Beam
         this.beamToggle$isHidden = hidden;
         this.setChanged();
         if (this.level != null) {
-            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+            BlockState state = this.getBlockState();
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
         }
     }
 

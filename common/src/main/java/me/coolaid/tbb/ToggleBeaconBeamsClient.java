@@ -1,6 +1,5 @@
 package me.coolaid.tbb;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import me.coolaid.tbb.config.LocalToggleStore;
 import me.coolaid.tbb.network.ServerPresenceTracker;
 import me.coolaid.tbb.util.BeamToggleAccess;
@@ -36,12 +35,21 @@ public class ToggleBeaconBeamsClient {
 
         // Client-only fallback
         if (!ServerPresenceTracker.isServerPresent()) {
+            String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
+            var dimension = mc.level.dimension();
+            boolean storeChanged = false;
+
             for (BlockEntity be : mc.level.getGloballyRenderedBlockEntities()) {
-                if (be instanceof BeaconBlockEntity beacon) {
-                    String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
-                    LocalToggleStore.setHidden(worldIdentifier, mc.level.dimension(), be.getBlockPos(), hide);
-                    mc.level.sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 3);
+                if (be instanceof BeaconBlockEntity) {
+                    BlockPos pos = be.getBlockPos();
+                    storeChanged |= LocalToggleStore.setHiddenInMemory(worldIdentifier, dimension, pos, hide);
+                    var state = be.getBlockState();
+                    mc.level.sendBlockUpdated(pos, state, state, 3);
                 }
+            }
+
+            if (storeChanged) {
+                LocalToggleStore.save();
             }
             return;
         }
@@ -50,9 +58,9 @@ public class ToggleBeaconBeamsClient {
             if (be instanceof BeaconBlockEntity beacon) {
                 BeamToggleAccess access = (BeamToggleAccess) beacon;
                 if (access.beamToggle$isHidden() != hide) {
+                    BlockPos pos = be.getBlockPos();
                     access.beamToggle$setHidden(hide);
-                    mc.level.sendBlockUpdated(be.getBlockPos(), be.getBlockState(), be.getBlockState(), 3);
-                    updatedPositions.add(beacon.getBlockPos().immutable());
+                    updatedPositions.add(pos.immutable());
                 }
             }
         }
@@ -71,7 +79,6 @@ public class ToggleBeaconBeamsClient {
                         BeamToggleAccess serverAccess = (BeamToggleAccess) serverBeacon;
                         if (serverAccess.beamToggle$isHidden() != hide) {
                             serverAccess.beamToggle$setHidden(hide);
-                            serverLevel.sendBlockUpdated(pos, serverBeacon.getBlockState(), serverBeacon.getBlockState(), 3);
                         }
                     }
                 }

@@ -149,16 +149,18 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
             this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
         } else {
             // Client-only fallback: Write to local store and force re-render
-            if (this.minecraft.level != null && this.beamToggle$beaconPos != null) {
+            var level = this.minecraft.level;
+            if (level != null && this.beamToggle$beaconPos != null) {
                 String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(this.minecraft);
-                ResourceKey<Level> dim = this.minecraft.level.dimension();
+                ResourceKey<Level> dim = level.dimension();
                 boolean current = LocalToggleStore.isHidden(worldIdentifier, dim, this.beamToggle$beaconPos);
                 LocalToggleStore.setHidden(worldIdentifier, dim, this.beamToggle$beaconPos, !current);
                 // Force the beacon renderer to re-evaluate getBeamSections
-                this.minecraft.level.sendBlockUpdated(
+                var state = level.getBlockState(this.beamToggle$beaconPos);
+                level.sendBlockUpdated(
                     this.beamToggle$beaconPos,
-                    this.minecraft.level.getBlockState(this.beamToggle$beaconPos),
-                    this.minecraft.level.getBlockState(this.beamToggle$beaconPos),
+                    state,
+                    state,
                     3
                 );
             }

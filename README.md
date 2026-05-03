@@ -1,6 +1,6 @@
 # Toggle Beacon Beams
-![](https://img.shields.io/badge/Loader-Fabric%2fQuilt_%2b_NeoForge-darkcyan?style=for-the-badge)
-![](https://img.shields.io/badge/Supports_Versions-1.21.9_--_1.21.11_|_26.1.x-darkcyan?style=for-the-badge)
+![](https://img.shields.io/badge/Loaders-Fabric%2fQuilt%2fNeoForge-darkcyan?style=for-the-badge)
+![](https://img.shields.io/badge/Versions-1.21.9_--_1.21.11_|_26.1.x-darkcyan?style=for-the-badge)
 ![](https://img.shields.io/badge/Environments-Client_+_Server-darkcyan?style=for-the-badge)
 
 ### Adds a simple beacon beam toggle button to the beacon UI!
@@ -16,3 +16,5 @@
 [<img alt="Support me on Ko-fi" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/donate/kofi-singular-alt_vector.svg"/>](https://ko-fi.com/coolaid48)
 [<img alt="Chat with me in Discord" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/social/discord-plural_vector.svg"/>](https://discord.gg/J2SGshKNah)
 [<img alt="Watch me on Twitch" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/social/twitch-singular_vector.svg"/>](https://www.twitch.tv/coolaid48)
+
+<img src="assets/tbb_demo.gif" width="650"/>

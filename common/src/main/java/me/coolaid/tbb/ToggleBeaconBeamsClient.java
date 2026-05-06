@@ -27,24 +27,38 @@ public class ToggleBeaconBeamsClient {
         return mc.getCurrentServer() != null;
     }
 
+    public static void refreshLoadedBeaconRendering() {
+        Minecraft mc = Minecraft.getInstance();
+        var level = mc.level;
+        if (level == null) return;
+
+        for (BlockEntity be : level.getGloballyRenderedBlockEntities()) {
+            if (be instanceof BeaconBlockEntity) {
+                BlockPos pos = be.getBlockPos();
+                var state = be.getBlockState();
+                level.sendBlockUpdated(pos, state, state, 3);
+            }
+        }
+    }
+
     public static void setAllLoadedBeaconsHidden(boolean hide) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return;
+        var level = mc.level;
+        if (level == null) return;
 
-        List<BlockPos> updatedPositions = new ArrayList<>();
+        String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
+        var dimension = level.dimension();
+        boolean serverPresent = ServerPresenceTracker.isServerPresent();
+        boolean storeChanged = !hide && LocalToggleStore.clearInMemory(worldIdentifier, dimension);
 
         // Client-only fallback
-        if (!ServerPresenceTracker.isServerPresent()) {
-            String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
-            var dimension = mc.level.dimension();
-            boolean storeChanged = false;
-
-            for (BlockEntity be : mc.level.getGloballyRenderedBlockEntities()) {
+        if (!serverPresent) {
+            for (BlockEntity be : level.getGloballyRenderedBlockEntities()) {
                 if (be instanceof BeaconBlockEntity) {
                     BlockPos pos = be.getBlockPos();
                     storeChanged |= LocalToggleStore.setHiddenInMemory(worldIdentifier, dimension, pos, hide);
                     var state = be.getBlockState();
-                    mc.level.sendBlockUpdated(pos, state, state, 3);
+                    level.sendBlockUpdated(pos, state, state, 3);
                 }
             }
 
@@ -54,7 +68,8 @@ public class ToggleBeaconBeamsClient {
             return;
         }
 
-        for (BlockEntity be : mc.level.getGloballyRenderedBlockEntities()) {
+        List<BlockPos> updatedPositions = new ArrayList<>();
+        for (BlockEntity be : level.getGloballyRenderedBlockEntities()) {
             if (be instanceof BeaconBlockEntity beacon) {
                 BeamToggleAccess access = (BeamToggleAccess) beacon;
                 if (access.beamToggle$isHidden() != hide) {
@@ -68,7 +83,6 @@ public class ToggleBeaconBeamsClient {
         MinecraftServer server = mc.getSingleplayerServer();
         if (server != null && !updatedPositions.isEmpty()) {
             List<BlockPos> serverPositions = List.copyOf(updatedPositions);
-            var dimension = mc.level.dimension();
             server.execute(() -> {
                 ServerLevel serverLevel = server.getLevel(dimension);
                 if (serverLevel == null) return;
@@ -83,6 +97,10 @@ public class ToggleBeaconBeamsClient {
                     }
                 }
             });
+        }
+
+        if (storeChanged) {
+            LocalToggleStore.save();
         }
     }
 

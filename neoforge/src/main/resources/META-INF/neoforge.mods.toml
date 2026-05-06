@@ -8,8 +8,7 @@ modId = "togglebeaconbeams"
 version = "${version}"
 displayName = "Toggle Beacon Beams"
 authors = "CoolAid48"
-credits = "MandaLin (Mod icon and sprites)"
-credits = "Jag3Dagster"
+credits = "Jag3Dagster, MandaLin (Mod icon and sprites)"
 
 description = '''
 Adds a simple beacon beam toggle button to the beacon UI

@@ -2,16 +2,12 @@ package me.coolaid.tbb.config;
 
 import me.coolaid.tbb.ToggleBeaconBeams;
 import me.coolaid.tbb.ToggleBeaconBeamsClient;
-import me.coolaid.tbb.util.BeamToggleAccess;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ConfigScreen extends Screen {
 
@@ -41,8 +37,6 @@ public class ConfigScreen extends Screen {
         StringWidget titleWidget = new StringWidget((this.width - textWidth) / 2, 10, textWidth, 9, title, this.font);
         this.addRenderableWidget(titleWidget);
 
-        this.beamToggle$syncConfigToLoadedBeacons();
-
         int buttonWidth = 190;
         int buttonHeight = 20;
         int buttonSpacing = 8;
@@ -53,10 +47,7 @@ public class ConfigScreen extends Screen {
                 this.beamToggle$getModEnabledButtonText(),
                 btn -> {
                     ConfigManager.get().modEnabled = !ConfigManager.get().modEnabled;
-                    if (!ConfigManager.get().modEnabled) {
-                        ConfigManager.get().hideAllBeaconBeams = false;
-                        ToggleBeaconBeamsClient.setAllLoadedBeaconsHidden(false);
-                    }
+                    ToggleBeaconBeamsClient.refreshLoadedBeaconRendering();
 
                     btn.setMessage(this.beamToggle$getModEnabledButtonText());
                     this.beamToggle$toggleAllButton.active = ConfigManager.get().modEnabled;
@@ -69,8 +60,13 @@ public class ConfigScreen extends Screen {
         this.beamToggle$toggleAllButton = Button.builder(
                 this.beamToggle$getToggleAllButtonText(),
                 btn -> {
-                    ConfigManager.get().hideAllBeaconBeams = !ConfigManager.get().hideAllBeaconBeams;
-                    ToggleBeaconBeamsClient.setAllLoadedBeaconsHidden(ConfigManager.get().hideAllBeaconBeams);
+                    boolean hideAll = !ConfigManager.get().hideAllBeaconBeams;
+                    ConfigManager.get().hideAllBeaconBeams = hideAll;
+                    if (hideAll) {
+                        ToggleBeaconBeamsClient.refreshLoadedBeaconRendering();
+                    } else {
+                        ToggleBeaconBeamsClient.setAllLoadedBeaconsHidden(false);
+                    }
                     btn.setMessage(this.beamToggle$getToggleAllButtonText());
                     ConfigManager.save();
                 }
@@ -97,28 +93,6 @@ public class ConfigScreen extends Screen {
             return Component.translatable("text.configButton.modDisabled");
         }
         return Component.translatable(ConfigManager.get().hideAllBeaconBeams ? "text.configButton.showAll" : "text.configButton.hideAll");
-    }
-
-    private void beamToggle$syncConfigToLoadedBeacons() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) {
-            return;
-        }
-
-        boolean foundBeacon = false;
-        for (BlockEntity be : mc.level.getGloballyRenderedBlockEntities()) {
-            if (be instanceof BeaconBlockEntity beacon) {
-                foundBeacon = true;
-                if (!((BeamToggleAccess) beacon).beamToggle$isHidden()) {
-                    ConfigManager.get().hideAllBeaconBeams = false;
-                    return;
-                }
-            }
-        }
-
-        if (foundBeacon) {
-            ConfigManager.get().hideAllBeaconBeams = true;
-        }
     }
 
     @Override

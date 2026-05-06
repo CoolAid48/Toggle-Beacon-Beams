@@ -22,25 +22,49 @@ public class LocalToggleStore {
         return worldIdentifier + "@" + dimension.identifier() + "@" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
+    private static String getKeyPrefixFrom(String worldIdentifier, ResourceKey<Level> dimension) {
+        return worldIdentifier + "@" + dimension.identifier() + "@";
+    }
+
     public static boolean isHidden(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos) {
-        return toggles.getOrDefault(getKeyFrom(worldIdentifier, dimension, pos), false);
+        return isHidden(worldIdentifier, dimension, pos, false);
+    }
+
+    public static boolean isHidden(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean defaultHidden) {
+        if (toggles.isEmpty()) return defaultHidden;
+        return toggles.getOrDefault(getKeyFrom(worldIdentifier, dimension, pos), defaultHidden);
     }
 
     public static void setHidden(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean hidden) {
-        if (setHiddenInMemory(worldIdentifier, dimension, pos, hidden)) {
+        setHidden(worldIdentifier, dimension, pos, hidden, false);
+    }
+
+    public static void setHidden(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean hidden, boolean defaultHidden) {
+        if (setHiddenInMemory(worldIdentifier, dimension, pos, hidden, defaultHidden)) {
             save();
         }
     }
 
     public static boolean setHiddenInMemory(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean hidden) {
+        return setHiddenInMemory(worldIdentifier, dimension, pos, hidden, false);
+    }
+
+    public static boolean setHiddenInMemory(String worldIdentifier, ResourceKey<Level> dimension, BlockPos pos, boolean hidden, boolean defaultHidden) {
         String key = getKeyFrom(worldIdentifier, dimension, pos);
-        if (hidden) {
-            if (Boolean.TRUE.equals(toggles.get(key))) return false;
-            toggles.put(key, true);
-            return true;
+        if (hidden == defaultHidden) {
+            return toggles.remove(key) != null;
         }
 
-        return toggles.remove(key) != null;
+        Boolean hiddenValue = hidden;
+        if (hiddenValue.equals(toggles.get(key))) return false;
+        toggles.put(key, hiddenValue);
+        return true;
+    }
+
+    public static boolean clearInMemory(String worldIdentifier, ResourceKey<Level> dimension) {
+        if (toggles.isEmpty()) return false;
+        String prefix = getKeyPrefixFrom(worldIdentifier, dimension);
+        return toggles.keySet().removeIf(key -> key.startsWith(prefix));
     }
 
     public static void load() {

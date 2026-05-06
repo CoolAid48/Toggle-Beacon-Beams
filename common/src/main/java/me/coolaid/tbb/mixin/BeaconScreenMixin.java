@@ -66,6 +66,10 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private AbstractWidget beamToggle$button;
     @Unique
     private BlockPos beamToggle$beaconPos;
+    @Unique
+    private boolean beamToggle$cachedHidden;
+    @Unique
+    private boolean beamToggle$hasCachedHidden;
 
     public BeaconScreenMixin(BeaconMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -115,7 +119,7 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
             buttonTexture = beamToggle$buttonTexture;
         }
 
-        Identifier texture = this.beamToggle$isCurrentBeaconHidden() ? beamToggle$showBeamTexture : beamToggle$hideBeamTexture;
+        Identifier texture = this.beamToggle$cachedHidden ? beamToggle$showBeamTexture : beamToggle$hideBeamTexture;
         int x = this.beamToggle$button.getX();
         int y = this.beamToggle$button.getY();
 
@@ -140,32 +144,39 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     private void beamToggle$onPressed() {
         if (this.minecraft.gameMode == null) return;
 
-        if (ServerPresenceTracker.isServerPresent()) {
+        var level = this.minecraft.level;
+        BlockPos pos = this.beamToggle$resolveBeaconPos();
+        if (level == null || pos == null) return;
+
+        boolean serverPresent = ServerPresenceTracker.isServerPresent();
+        boolean serverHidden = this.beamToggle$getServerHidden(serverPresent, level, pos);
+        boolean hideAll = ConfigManager.get().hideAllBeaconBeams;
+        boolean defaultHidden = serverHidden || hideAll;
+        boolean useLocalOverride = hideAll || !serverPresent;
+        ResourceKey<Level> dimension = level.dimension();
+        String worldIdentifier = null;
+        boolean currentHidden = serverHidden;
+        if (useLocalOverride) {
+            worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(this.minecraft);
+            currentHidden = LocalToggleStore.isHidden(worldIdentifier, dimension, pos, defaultHidden);
+        }
+        boolean targetHidden = !currentHidden;
+
+        if (serverPresent && targetHidden != serverHidden) {
             int buttonId = ToggleBeaconBeamsClient.canUseClientConfigScreen()
                 ? ToggleBeaconBeams.TOGGLE_BEAM_BUTTON_ID
-                : (this.beamToggle$isCurrentBeaconHidden()
-                    ? ToggleBeaconBeams.SHOW_BEAM_BUTTON_ID
-                    : ToggleBeaconBeams.HIDE_BEAM_BUTTON_ID);
+                : (targetHidden
+                    ? ToggleBeaconBeams.HIDE_BEAM_BUTTON_ID
+                    : ToggleBeaconBeams.SHOW_BEAM_BUTTON_ID);
             this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, buttonId);
-        } else {
-            // Client-only fallback: Write to local store and force re-render
-            var level = this.minecraft.level;
-            if (level != null && this.beamToggle$beaconPos != null) {
-                String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(this.minecraft);
-                ResourceKey<Level> dim = level.dimension();
-                boolean current = LocalToggleStore.isHidden(worldIdentifier, dim, this.beamToggle$beaconPos);
-                LocalToggleStore.setHidden(worldIdentifier, dim, this.beamToggle$beaconPos, !current);
-                // Force the beacon renderer to re-evaluate getBeamSections
-                var state = level.getBlockState(this.beamToggle$beaconPos);
-                level.sendBlockUpdated(
-                    this.beamToggle$beaconPos,
-                    state,
-                    state,
-                    3
-                );
-            }
         }
 
+        if (useLocalOverride) {
+            LocalToggleStore.setHidden(worldIdentifier, dimension, pos, targetHidden, defaultHidden);
+        }
+
+        var state = level.getBlockState(pos);
+        level.sendBlockUpdated(pos, state, state, 3);
         this.beamToggle$updateButtonPresentation();
     }
 
@@ -174,6 +185,10 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
         if (this.beamToggle$button == null) return;
 
         boolean isHidden = this.beamToggle$isCurrentBeaconHidden();
+        if (this.beamToggle$hasCachedHidden && this.beamToggle$cachedHidden == isHidden) return;
+
+        this.beamToggle$cachedHidden = isHidden;
+        this.beamToggle$hasCachedHidden = true;
         this.beamToggle$button.setTooltip(Tooltip.create(isHidden ? beamToggle$showText : beamToggle$hideText));
     }
 
@@ -188,20 +203,29 @@ public abstract class BeaconScreenMixin extends AbstractContainerScreen<BeaconMe
     @Unique
     private boolean beamToggle$isCurrentBeaconHidden() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) return false;
+        var level = mc.level;
+        if (level == null) return false;
 
         BlockPos pos = this.beamToggle$resolveBeaconPos();
         if (pos == null) return false;
 
-        if (ServerPresenceTracker.isServerPresent()) {
-            if (mc.level.getBlockEntity(pos) instanceof BeaconBlockEntity beacon) {
-                return ((BeamToggleAccess) beacon).beamToggle$isHidden();
-            }
-        } else {
-            String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
-            return LocalToggleStore.isHidden(worldIdentifier, mc.level.dimension(), pos);
+        boolean serverPresent = ServerPresenceTracker.isServerPresent();
+        boolean serverHidden = this.beamToggle$getServerHidden(serverPresent, level, pos);
+        boolean hideAll = ConfigManager.get().hideAllBeaconBeams;
+        boolean defaultHidden = serverHidden || hideAll;
+        if (!hideAll && serverPresent) {
+            return serverHidden;
         }
 
+        String worldIdentifier = ToggleBeaconBeamsClient.getWorldUniqueIdentifier(mc);
+        return LocalToggleStore.isHidden(worldIdentifier, level.dimension(), pos, defaultHidden);
+    }
+
+    @Unique
+    private boolean beamToggle$getServerHidden(boolean serverPresent, Level level, BlockPos pos) {
+        if (serverPresent && level.getBlockEntity(pos) instanceof BeaconBlockEntity beacon) {
+            return ((BeamToggleAccess) beacon).beamToggle$isHidden();
+        }
         return false;
     }
 

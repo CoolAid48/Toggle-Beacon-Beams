@@ -7,7 +7,7 @@
 
 ## This mod features:
 - **A simple toggle button within the beacon UI to turn individual beacon beams on and off**
-- **Config toggle to turn all loaded beacon beams off and in singleplayer**
+- **Config toggle to hide all beacon beams client-side**
 - **Full multiplayer support, with synced toggles when installed on both the client and server**
 - **Without the server-side mod, toggles now automatically fall back to client-only mode!**
 

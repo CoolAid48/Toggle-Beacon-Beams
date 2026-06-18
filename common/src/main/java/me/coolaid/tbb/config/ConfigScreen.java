@@ -1,6 +1,5 @@
 package me.coolaid.tbb.config;
 
-import me.coolaid.tbb.ToggleBeaconBeams;
 import me.coolaid.tbb.ToggleBeaconBeamsClient;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,7 +21,7 @@ public class ConfigScreen extends Screen {
     @Override
     protected void init() {
         if (ToggleBeaconBeamsClient.canUseClientConfigScreen()) {
-            this.minecraft.setScreen(null);
+            this.minecraft.setScreenAndShow(null);
             if (this.minecraft.player != null) {
                 this.minecraft.player.sendOverlayMessage(Component.translatable("text.configScreen.onServer").withStyle(ChatFormatting.DARK_RED));
             }
@@ -78,7 +77,7 @@ public class ConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(
                 Component.translatable("text.configButton.done"),
                 btn -> {
-                    minecraft.setScreen(parent);
+                    minecraft.setScreenAndShow(parent);
                 }
         ).bounds(startX, y + (buttonHeight + buttonSpacing) * 2, buttonWidth, buttonHeight).build());
 
@@ -105,6 +104,6 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.setScreenAndShow(parent);
     }
 }
